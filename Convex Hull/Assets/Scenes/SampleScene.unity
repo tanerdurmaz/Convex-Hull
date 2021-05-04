@@ -150,7 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc79d5942e9c95d448e820daea4f0632, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cam: {fileID: 0}
+  cam: {fileID: 963194227}
 --- !u!4 &87147657
 Transform:
   m_ObjectHideFlags: 0
@@ -374,6 +374,7 @@ MonoBehaviour:
   rangeY: 25
   rangeZ: 25
   pointCount: 50
+  points: []
 --- !u!4 &1256289509
 Transform:
   m_ObjectHideFlags: 0
