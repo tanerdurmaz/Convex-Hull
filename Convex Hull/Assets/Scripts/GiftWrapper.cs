@@ -1,0 +1,196 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+
+//point count over point.getsize()
+public class GiftWrapper : MonoBehaviour
+{
+    [SerializeField] private GameObject point;
+    [SerializeField] private float rangeX;
+    [SerializeField] private float rangeY;
+    [SerializeField] private float rangeZ;
+    [SerializeField] private int pointCount;
+    [SerializeField] private GameObject[] points;
+
+    //to-do check function 
+    [SerializeField] private Queue<Facet> facets = new Queue<Facet>();
+    [SerializeField] private List<Edge> subFacets = new List<Edge>();
+    [SerializeField] private Queue<Facet> finalFacets = new Queue<Facet>();
+
+    public Material red;
+    public Material blue;
+
+    //game object to vector3
+    public struct Facet
+    {
+        public Facet(GameObject a, GameObject b, GameObject c, Material m)
+        {
+            this.a = a;
+            this.b = b;
+            this.c = c;
+            this.a.GetComponent<MeshRenderer>().material = m;
+            this.b.GetComponent<MeshRenderer>().material = m;
+            this.c.GetComponent<MeshRenderer>().material = m;
+        }
+
+        public GameObject a { get; }
+        public GameObject b { get; }
+        public GameObject c { get; }
+    }
+    public struct Edge
+    {
+        public Edge(GameObject a, GameObject b, Material m)
+        {
+            this.a = a;
+            this.b = b;
+            this.a.GetComponent<MeshRenderer>().material = m;
+            this.b.GetComponent<MeshRenderer>().material = m;
+        }
+
+        public GameObject a { get; }
+        public GameObject b { get; }
+    }
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        points = new GameObject[pointCount];
+        /*points[0] = Instantiate(point, new Vector3(-50f, 20f, 15f), Quaternion.identity);
+        points[1] = Instantiate(point, new Vector3(-50f, 66f, 70f), Quaternion.identity);
+        points[2] = Instantiate(point, new Vector3(-50f, 55f, 35f), Quaternion.identity);*/
+
+
+        for (int i = 0; i < pointCount; i++)
+        {
+            points[i] = Instantiate(point, new Vector3(Random.Range(-1 * rangeX, rangeX), Random.Range(-1 * rangeY, rangeY), Random.Range(-1 * rangeZ, rangeZ)), Quaternion.identity);
+        }
+
+    }
+
+
+    //bence burada
+    void insertEdges(Facet f)
+    {
+        Edge e1 = new Edge(f.a, f.b, blue);
+        Edge e2 = new Edge(f.b, f.c, blue);
+        Edge e3 = new Edge(f.a, f.c, blue);
+
+        insertEdge(e1);
+        insertEdge(e2);
+        insertEdge(e3);
+    }
+
+    void insertEdge(Edge e) {
+        foreach (Edge i in subFacets)
+        {
+            if ((e.a == i.a && e.b == i.b) || (e.a == i.b && e.b == i.a))
+            {
+                Debug.Log("edge already inserted" + i.a.transform.position.ToString() + " , " + i.b.transform.position.ToString());
+                subFacets.Remove(i);
+                return;
+            }
+
+        }
+        subFacets.Add(e);
+    }
+    //extra edge input, 
+    GameObject findFacetPoint(GameObject a, GameObject b, GameObject c)
+    {
+        //var cotangentList = new ArrayList();
+
+        var max = -2147483648f;
+        int index = -1;
+
+        for( int i = 0; i < pointCount; i++) {
+            GameObject g = points[i];
+           
+            //transform compare
+            if (g.transform != a && g != b && g != c)
+            {
+
+                Vector3 va = a.transform.position;
+                Vector3 vb = b.transform.position;
+                Vector3 vc = c.transform.position;
+                Vector3 vg = g.transform.position;
+
+
+                Vector3 vk = vg - vb;
+                Vector3 e1 = vc - va;
+                Vector3 e2 = vb - va;
+
+
+                Vector3 pNorm = (Vector3.Cross(e1, e2)).normalized;
+
+                Vector3 x = Vector3.Cross(e2, pNorm);
+
+                var angle = -1f * ((Vector3.Dot(vk, x) / Vector3.Dot(vk, pNorm)));
+
+                if (angle > max)
+                {
+                    max = angle;
+                    index = i;
+                }
+                Debug.Log("angle:  " + angle);
+                //Debug.Log(vk.ToString());
+                //Debug.Log(pNorm.ToString());
+                //Debug.Log("edge already inserted");
+            }
+        }
+        return points[index];
+    }
+    void Giftwrap() {
+
+        //
+        Facet f = new Facet(points[0], points[1], points[2], red);
+        facets.Enqueue(f);
+        finalFacets.Enqueue(f);
+        insertEdges(facets.Peek());
+
+
+        while (facets.Count > 0 )
+        {
+
+            Facet curF = facets.Dequeue();
+            Edge[] T = new Edge[3];
+            T[0] = new Edge(curF.a, curF.b, blue);
+            T[1] = new Edge(curF.b, curF.c, blue);
+            T[2] = new Edge(curF.c, curF.a, blue);
+
+            for (int j = 0; j < subFacets.Count; j++)
+            {
+                Edge e = subFacets[j];
+                for (int i = 0; i < 3; i++)
+                {
+                    //Debug.Log("2");
+                    if ((T[i].a == e.a && T[i].b == e.b) || (T[i].a == e.b && T[i].b == e.a))
+                    {
+                        GameObject c = findFacetPoint(curF.a, curF.b, curF.c);
+                        Facet fPrime = new Facet(curF.a, curF.b, c, red);
+                        Debug.Log("fprime: " + c.transform.position.ToString());
+                        facets.Enqueue(fPrime);
+                        finalFacets.Enqueue(fPrime);
+                        insertEdges(fPrime);
+                    }
+                }
+            }
+        }
+        
+        foreach (Facet i in finalFacets)
+        {
+            i.a.GetComponent<MeshRenderer>().material = red;
+            i.b.GetComponent<MeshRenderer>().material = red;
+            i.c.GetComponent<MeshRenderer>().material = red;
+        }
+
+        
+    }
+    // Update is called once per frame
+    void Update()
+    {
+        if (Input.GetButtonUp("Fire2"))
+        {
+            Giftwrap();
+        }
+    }
+}
