@@ -373,7 +373,7 @@ MonoBehaviour:
   rangeX: 10
   rangeY: 10
   rangeZ: 10
-  pointCount: 6
+  pointCount: 13
   points: []
   red: {fileID: 2100000, guid: e46dcd4252e2ba942a131f4b8b67a672, type: 2}
   blue: {fileID: 2100000, guid: ec6bf987e207794418aba1f3f9fd4314, type: 2}

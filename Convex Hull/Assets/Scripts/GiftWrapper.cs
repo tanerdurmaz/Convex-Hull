@@ -56,12 +56,12 @@ public class GiftWrapper : MonoBehaviour
     void Start()
     {
         points = new GameObject[pointCount];
-        /*points[0] = Instantiate(point, new Vector3(-50f, 20f, 15f), Quaternion.identity);
+        points[0] = Instantiate(point, new Vector3(-100f, 20f, 15f), Quaternion.identity);
         points[1] = Instantiate(point, new Vector3(-50f, 66f, 70f), Quaternion.identity);
-        points[2] = Instantiate(point, new Vector3(-50f, 55f, 35f), Quaternion.identity);*/
+        points[2] = Instantiate(point, new Vector3(-50f, 80f, 20f), Quaternion.identity);
 
 
-        for (int i = 0; i < pointCount; i++)
+        for (int i = 3; i < pointCount; i++)
         {
             points[i] = Instantiate(point, new Vector3(Random.Range(-1 * rangeX, rangeX), Random.Range(-1 * rangeY, rangeY), Random.Range(-1 * rangeZ, rangeZ)), Quaternion.identity);
         }
@@ -81,7 +81,8 @@ public class GiftWrapper : MonoBehaviour
         insertEdge(e3);
     }
 
-    void insertEdge(Edge e) {
+    void insertEdge(Edge e)
+    {
         foreach (Edge i in subFacets)
         {
             if ((e.a == i.a && e.b == i.b) || (e.a == i.b && e.b == i.a))
@@ -95,18 +96,19 @@ public class GiftWrapper : MonoBehaviour
         subFacets.Add(e);
     }
     //extra edge input, 
-    GameObject findFacetPoint(GameObject a, GameObject b, GameObject c)
+    GameObject findFacetPoint(GameObject a, GameObject b, GameObject c, Edge e)
     {
         //var cotangentList = new ArrayList();
 
         var max = -2147483648f;
         int index = -1;
 
-        for( int i = 0; i < pointCount; i++) {
+        for (int i = 0; i < pointCount; i++)
+        {
             GameObject g = points[i];
-           
+
             //transform compare
-            if (g.transform != a && g != b && g != c)
+            if (g.transform.position != a.transform.position && g.transform.position != b.transform.position && g.transform.position != c.transform.position)
             {
 
                 Vector3 va = a.transform.position;
@@ -114,15 +116,48 @@ public class GiftWrapper : MonoBehaviour
                 Vector3 vc = c.transform.position;
                 Vector3 vg = g.transform.position;
 
+                Vector3 vk;
+                Vector3 e1;
+                Vector3 e2;
 
-                Vector3 vk = vg - vb;
-                Vector3 e1 = vc - va;
-                Vector3 e2 = vb - va;
+
+                if (compareEdge(e, new Edge(a, b, blue)))
+                {
+                    vk = vg - vb;
+                    e1 = vc - va;
+                    e2 = vb - va;
+                }
+                else if (compareEdge(e, new Edge(a, c, blue)))
+                {
+                    vk = vg - va;
+                    e1 = vb - vc;
+                    e2 = va - vc;
+                }
+                else if (compareEdge(e, new Edge(b, c, blue)))
+                {
+                    vk = vg - vc;
+                    e1 = va - vb;
+                    e2 = vc - vb;
+                }
+                else
+                {
+                    Debug.Log("!!!!!!!!!! findFacetPoint comparison error !!!!!!!!");
+                    vk = vg - vb;
+                    e1 = vc - va;
+                    e2 = vb - va;
+                }
 
 
                 Vector3 pNorm = (Vector3.Cross(e1, e2)).normalized;
 
                 Vector3 x = Vector3.Cross(e2, pNorm);
+
+                Debug.Log("vk is " + vk);
+                Debug.Log("x is " + x);
+                Debug.Log("pNorm is " + pNorm);
+
+                Debug.Log("1st dot product " + Vector3.Dot(vk, x));
+                Debug.Log("2nd dot product " + Vector3.Dot(vk, pNorm));
 
                 var angle = -1f * ((Vector3.Dot(vk, x) / Vector3.Dot(vk, pNorm)));
 
@@ -139,7 +174,8 @@ public class GiftWrapper : MonoBehaviour
         }
         return points[index];
     }
-    void Giftwrap() {
+    void Giftwrap()
+    {
 
         //
         Facet f = new Facet(points[0], points[1], points[2], red);
@@ -148,7 +184,7 @@ public class GiftWrapper : MonoBehaviour
         insertEdges(facets.Peek());
 
 
-        while (facets.Count > 0 )
+        while (facets.Count > 0)
         {
 
             Facet curF = facets.Dequeue();
@@ -163,9 +199,9 @@ public class GiftWrapper : MonoBehaviour
                 for (int i = 0; i < 3; i++)
                 {
                     //Debug.Log("2");
-                    if ((T[i].a == e.a && T[i].b == e.b) || (T[i].a == e.b && T[i].b == e.a))
+                    if (compareEdge(T[i], e))
                     {
-                        GameObject c = findFacetPoint(curF.a, curF.b, curF.c);
+                        GameObject c = findFacetPoint(curF.a, curF.b, curF.c, e);
                         Facet fPrime = new Facet(curF.a, curF.b, c, red);
                         Debug.Log("fprime: " + c.transform.position.ToString());
                         facets.Enqueue(fPrime);
@@ -175,7 +211,12 @@ public class GiftWrapper : MonoBehaviour
                 }
             }
         }
-        
+
+        foreach (GameObject p in points)
+        {
+            p.GetComponent<MeshRenderer>().material = blue;
+        }
+
         foreach (Facet i in finalFacets)
         {
             i.a.GetComponent<MeshRenderer>().material = red;
@@ -183,7 +224,7 @@ public class GiftWrapper : MonoBehaviour
             i.c.GetComponent<MeshRenderer>().material = red;
         }
 
-        
+
     }
     // Update is called once per frame
     void Update()
@@ -193,4 +234,15 @@ public class GiftWrapper : MonoBehaviour
             Giftwrap();
         }
     }
+
+    bool compareEdge(Edge e1, Edge e2)
+    {
+        if ((e1.a == e2.a && e1.b == e2.b) || (e1.a == e2.b && e1.b == e2.a))
+        {
+            return true;
+        }
+        else
+            return false;
+    }
 }
+// end
