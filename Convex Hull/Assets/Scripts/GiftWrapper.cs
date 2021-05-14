@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.UI;
 
 //point count over point.getsize()
 public class GiftWrapper : MonoBehaviour
@@ -10,8 +10,9 @@ public class GiftWrapper : MonoBehaviour
     [SerializeField] private float rangeX;
     [SerializeField] private float rangeY;
     [SerializeField] private float rangeZ;
-    [SerializeField] private int pointCount;
+    [SerializeField] public int pointCount;
     [SerializeField] private GameObject[] points;
+    [SerializeField] public InputField pointInput;
 
     //to-do check function 
     [SerializeField] private Queue<Facet> facets = new Queue<Facet>();
@@ -47,8 +48,6 @@ public class GiftWrapper : MonoBehaviour
             this.a.GetComponent<MeshRenderer>().material = m;
             this.b.GetComponent<MeshRenderer>().material = m;
             Debug.DrawLine(a.transform.position, b.transform.position, Color.green, 250f);
-            //Debug.DrawLine(Vector3.zero, new Vector3(0, 5, 0), Color.green);
-
         }
 
         public GameObject a { get; }
@@ -58,16 +57,17 @@ public class GiftWrapper : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        points = new GameObject[pointCount];
+
+        /*
         points[0] = Instantiate(point, new Vector3(-100f, 20f, 15f), Quaternion.identity);
         points[1] = Instantiate(point, new Vector3(-50f, 66f, 70f), Quaternion.identity);
         points[2] = Instantiate(point, new Vector3(-50f, 80f, 20f), Quaternion.identity);
         
 
-        for (int i = 3; i < pointCount; i++)
+        for (int i = 0; i < pointCount; i++)
         {
             points[i] = Instantiate(point, new Vector3(Random.Range(-1 * rangeX, rangeX), Random.Range(-1 * rangeY, rangeY), Random.Range(-1 * rangeZ, rangeZ)), Quaternion.identity);
-        }
+        }*/
         //Debug.DrawLine(Vector3.zero, new Vector3(0, 5, 0), Color.green, 250f);
         /*
         gameObject.AddComponent<MeshFilter>();
@@ -81,6 +81,16 @@ public class GiftWrapper : MonoBehaviour
 
     }
 
+    public void generatePoints() {
+
+        pointCount = int.Parse(pointInput.text);
+        points = new GameObject[pointCount];
+
+        for (int i = 0; i < pointCount; i++)
+        {
+            points[i] = Instantiate(point, new Vector3(Random.Range(-1 * rangeX, rangeX), Random.Range(-1 * rangeY, rangeY), Random.Range(-1 * rangeZ, rangeZ)), Quaternion.identity);
+        }
+    }
 
     //bence burada
     void insertEdges(Facet f)
@@ -130,6 +140,8 @@ public class GiftWrapper : MonoBehaviour
 
                 Vector3 vc;
 
+                bool reverse = false;
+
                 if (compareEdge(e, new Edge(a, b, blue)))
                 {
                     vc = c.transform.position;
@@ -165,7 +177,9 @@ public class GiftWrapper : MonoBehaviour
                 Debug.Log("1st dot product " + Vector3.Dot(vk, x));
                 Debug.Log("2nd dot product " + Vector3.Dot(vk, pNorm));
 */
-                var cotangent = -1f * ((Vector3.Dot(vk, x) / Vector3.Dot(vk, pNorm)));
+                var cotangent = 1f * ((Vector3.Dot(vk, x) / Vector3.Dot(vk, pNorm)));
+                if (reverse)
+                    cotangent = -1 * cotangent;
 
                 if (cotangent > max)
                 {
@@ -182,7 +196,7 @@ public class GiftWrapper : MonoBehaviour
         }
         return points[index];
     }
-    void Giftwrap()
+    public void Giftwrap()
     {
 
         
@@ -266,10 +280,10 @@ public class GiftWrapper : MonoBehaviour
         {
             Giftwrap();
         }
-        if (Input.GetButtonUp("Fire1"))
+        /*if (Input.GetButtonUp("Fire1"))
         {
             findFirstFacet();
-        }
+        }*/
 
     }
 
@@ -283,7 +297,7 @@ public class GiftWrapper : MonoBehaviour
             return false;
     }
 
-    Facet findFirstFacet()
+    public Facet findFirstFacet()
     {
         GameObject p1 = findMinPoint(points);
         GameObject p2 = findEdgeOnHull(points, p1);
