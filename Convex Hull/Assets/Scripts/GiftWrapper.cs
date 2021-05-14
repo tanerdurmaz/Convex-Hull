@@ -124,41 +124,34 @@ public class GiftWrapper : MonoBehaviour
             if (g.transform.position != a.transform.position && g.transform.position != b.transform.position && g.transform.position != c.transform.position)
             {
 
-                Vector3 va = a.transform.position;
-                Vector3 vb = b.transform.position;
-                Vector3 vc = c.transform.position;
+                Vector3 va = e.a.transform.position;
+                Vector3 vb = e.b.transform.position;
                 Vector3 vg = g.transform.position;
 
-                Vector3 vk;
-                Vector3 e1;
-                Vector3 e2;
-
+                Vector3 vc;
 
                 if (compareEdge(e, new Edge(a, b, blue)))
                 {
-                    vk = vg - vb;
-                    e1 = vc - va;
-                    e2 = vb - va;
+                    vc = c.transform.position;
                 }
                 else if (compareEdge(e, new Edge(a, c, blue)))
                 {
-                    vk = vg - va;
-                    e1 = vb - vc;
-                    e2 = va - vc;
+                    vc = b.transform.position;
                 }
                 else if (compareEdge(e, new Edge(b, c, blue)))
                 {
-                    vk = vg - vc;
-                    e1 = va - vb;
-                    e2 = vc - vb;
+                    vc = a.transform.position;
                 }
                 else
                 {
                     Debug.Log("!!!!!!!!!! findFacetPoint comparison error !!!!!!!!");
-                    vk = vg - vb;
-                    e1 = vc - va;
-                    e2 = vb - va;
+                    vc = a.transform.position;
                 }
+
+
+                Vector3 vk = vg - vb;
+                Vector3 e1 = vc - va;
+                Vector3 e2 = vb - va;
 
 
                 Vector3 pNorm = (Vector3.Cross(e1, e2)).normalized;
@@ -223,12 +216,11 @@ public class GiftWrapper : MonoBehaviour
                         Debug.Log("edge: " + e.a.transform.position + " , " + e.b.transform.position + " fprime: " + c.transform.position.ToString());
                         facets.Enqueue(fPrime);
                         finalFacets.Enqueue(fPrime);
-                        insertEdges(fPrime);
-
-                        T[i] = new Edge(curF.a, curF.a, blue);
+                        insertEdges(fPrime);/*
+                        T[i] = new Edge(curF.a, curF.a, blue);/*
                         subFacets.RemoveAt(j);
                         i = 3;
-                        j = subFacets.Count;
+                        j = subFacets.Count;*/
 
                     }
                 }
