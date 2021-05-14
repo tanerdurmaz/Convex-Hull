@@ -204,10 +204,11 @@ public class GiftWrapper : MonoBehaviour
 
             Facet curF = facets.Dequeue();
             Edge[] T = new Edge[3];
+
             T[0] = new Edge(curF.a, curF.b, blue);
             T[1] = new Edge(curF.b, curF.c, blue);
             T[2] = new Edge(curF.c, curF.a, blue);
-
+            Debug.Log("edge s in T inserted ");
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < subFacets.Count; j++)
@@ -223,10 +224,12 @@ public class GiftWrapper : MonoBehaviour
                         facets.Enqueue(fPrime);
                         finalFacets.Enqueue(fPrime);
                         insertEdges(fPrime);
-                        
-                        subFacets.RemoveAt(j);/*
+
+                        T[i] = new Edge(curF.a, curF.a, blue);
+                        subFacets.RemoveAt(j);
                         i = 3;
-                        j = subFacets.Count;*/
+                        j = subFacets.Count;
+
                     }
                 }
             }
