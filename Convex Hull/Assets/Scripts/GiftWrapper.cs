@@ -46,6 +46,9 @@ public class GiftWrapper : MonoBehaviour
             this.b = b;
             this.a.GetComponent<MeshRenderer>().material = m;
             this.b.GetComponent<MeshRenderer>().material = m;
+            Debug.DrawLine(a.transform.position, b.transform.position, Color.green, 250f);
+            //Debug.DrawLine(Vector3.zero, new Vector3(0, 5, 0), Color.green);
+
         }
 
         public GameObject a { get; }
@@ -65,6 +68,16 @@ public class GiftWrapper : MonoBehaviour
         {
             points[i] = Instantiate(point, new Vector3(Random.Range(-1 * rangeX, rangeX), Random.Range(-1 * rangeY, rangeY), Random.Range(-1 * rangeZ, rangeZ)), Quaternion.identity);
         }
+        //Debug.DrawLine(Vector3.zero, new Vector3(0, 5, 0), Color.green, 250f);
+        /*
+        gameObject.AddComponent<MeshFilter>();
+        gameObject.AddComponent<MeshRenderer>();
+        Mesh mesh = GetComponent<MeshFilter>().mesh;
+        mesh.Clear();
+        mesh.vertices = new Vector3[] { new Vector3(0, 0, 0), new Vector3(0, 1, 0), new Vector3(1, 1, 0) };
+        mesh.uv = new Vector2[] { new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1) };
+        mesh.triangles = new int[] { 0, 1, 2 };
+        */
 
     }
 
@@ -151,14 +164,14 @@ public class GiftWrapper : MonoBehaviour
                 Vector3 pNorm = (Vector3.Cross(e1, e2)).normalized;
 
                 Vector3 x = Vector3.Cross(e2, pNorm);
-
+/*
                 Debug.Log("vk is " + vk);
                 Debug.Log("x is " + x);
                 Debug.Log("pNorm is " + pNorm);
 
                 Debug.Log("1st dot product " + Vector3.Dot(vk, x));
                 Debug.Log("2nd dot product " + Vector3.Dot(vk, pNorm));
-
+*/
                 var angle = -1f * ((Vector3.Dot(vk, x) / Vector3.Dot(vk, pNorm)));
 
                 if (angle > max)
@@ -166,7 +179,9 @@ public class GiftWrapper : MonoBehaviour
                     max = angle;
                     index = i;
                 }
-                Debug.Log("angle:  " + angle);
+                //Debug.Log("angle:  " + angle);
+
+
                 //Debug.Log(vk.ToString());
                 //Debug.Log(pNorm.ToString());
                 //Debug.Log("edge already inserted");
@@ -193,20 +208,25 @@ public class GiftWrapper : MonoBehaviour
             T[1] = new Edge(curF.b, curF.c, blue);
             T[2] = new Edge(curF.c, curF.a, blue);
 
-            for (int j = 0; j < subFacets.Count; j++)
+            for (int i = 0; i < 3; i++)
             {
-                Edge e = subFacets[j];
-                for (int i = 0; i < 3; i++)
+                for (int j = 0; j < subFacets.Count; j++)
                 {
+                    Edge e = subFacets[j];
                     //Debug.Log("2");
                     if (compareEdge(T[i], e))
                     {
                         GameObject c = findFacetPoint(curF.a, curF.b, curF.c, e);
-                        Facet fPrime = new Facet(curF.a, curF.b, c, red);
-                        Debug.Log("fprime: " + c.transform.position.ToString());
+                        //Facet fPrime = new Facet(curF.a, curF.b, c, red);
+                        Facet fPrime = new Facet(e.a, e.b, c, red);
+                        Debug.Log("edge: " + e.a.transform.position + " , " + e.b.transform.position + " fprime: " + c.transform.position.ToString());
                         facets.Enqueue(fPrime);
                         finalFacets.Enqueue(fPrime);
                         insertEdges(fPrime);
+                        
+                        subFacets.RemoveAt(j);/*
+                        i = 3;
+                        j = subFacets.Count;*/
                     }
                 }
             }
@@ -222,6 +242,18 @@ public class GiftWrapper : MonoBehaviour
             i.a.GetComponent<MeshRenderer>().material = red;
             i.b.GetComponent<MeshRenderer>().material = red;
             i.c.GetComponent<MeshRenderer>().material = red;
+            Debug.DrawLine(i.a.transform.position, i.b.transform.position, Color.blue, 250f);
+            Debug.DrawLine(i.b.transform.position, i.c.transform.position, Color.blue, 250f);
+            Debug.DrawLine(i.a.transform.position, i.c.transform.position, Color.blue, 250f);
+            /*
+            gameObject.AddComponent<MeshFilter>();
+            gameObject.AddComponent<MeshRenderer>();
+            Mesh mesh = gameObject.GetComponent<MeshFilter>().mesh;
+            mesh.Clear();
+            mesh.vertices = new Vector3[] { i.a.transform.position, i.b.transform.position, i.c.transform.position };
+            //mesh.uv = new Vector2[] { new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1) };
+            mesh.triangles = new int[] { 0, 1, 2 };
+            */
         }
 
 
@@ -233,6 +265,7 @@ public class GiftWrapper : MonoBehaviour
         {
             Giftwrap();
         }
+
     }
 
     bool compareEdge(Edge e1, Edge e2)
@@ -244,5 +277,7 @@ public class GiftWrapper : MonoBehaviour
         else
             return false;
     }
+
+
 }
 // end
