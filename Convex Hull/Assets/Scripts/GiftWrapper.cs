@@ -62,7 +62,7 @@ public class GiftWrapper : MonoBehaviour
         points[0] = Instantiate(point, new Vector3(-100f, 20f, 15f), Quaternion.identity);
         points[1] = Instantiate(point, new Vector3(-50f, 66f, 70f), Quaternion.identity);
         points[2] = Instantiate(point, new Vector3(-50f, 80f, 20f), Quaternion.identity);
-
+        
 
         for (int i = 3; i < pointCount; i++)
         {
@@ -100,7 +100,7 @@ public class GiftWrapper : MonoBehaviour
         {
             if ((e.a == i.a && e.b == i.b) || (e.a == i.b && e.b == i.a))
             {
-                Debug.Log("edge already inserted" + i.a.transform.position.ToString() + " , " + i.b.transform.position.ToString());
+                //Debug.Log("edge already inserted" + i.a.transform.position.ToString() + " , " + i.b.transform.position.ToString());
                 subFacets.Remove(i);
                 return;
             }
@@ -154,7 +154,7 @@ public class GiftWrapper : MonoBehaviour
                 Vector3 e2 = vb - va;
 
 
-                Vector3 pNorm = (Vector3.Cross(e1, e2)).normalized;
+                Vector3 pNorm = (Vector3.Cross(e1, e2));
 
                 Vector3 x = Vector3.Cross(e2, pNorm);
 /*
@@ -165,14 +165,14 @@ public class GiftWrapper : MonoBehaviour
                 Debug.Log("1st dot product " + Vector3.Dot(vk, x));
                 Debug.Log("2nd dot product " + Vector3.Dot(vk, pNorm));
 */
-                var angle = -1f * ((Vector3.Dot(vk, x) / Vector3.Dot(vk, pNorm)));
+                var cotangent = -1f * ((Vector3.Dot(vk, x) / Vector3.Dot(vk, pNorm)));
 
-                if (angle > max)
+                if (cotangent > max)
                 {
-                    max = angle;
+                    max = cotangent;
                     index = i;
                 }
-                //Debug.Log("angle:  " + angle);
+                Debug.Log("cotangent:  " + cotangent + " for point " + points[i].transform.position + " from " + e.a.transform.position + " , " + e.b.transform.position);
 
 
                 //Debug.Log(vk.ToString());
@@ -185,8 +185,9 @@ public class GiftWrapper : MonoBehaviour
     void Giftwrap()
     {
 
-        //
+        
         Facet f = new Facet(points[0], points[1], points[2], red);
+        //Facet f = findFirstFacet();
         facets.Enqueue(f);
         finalFacets.Enqueue(f);
         insertEdges(facets.Peek());
@@ -230,6 +231,11 @@ public class GiftWrapper : MonoBehaviour
         foreach (GameObject p in points)
         {
             p.GetComponent<MeshRenderer>().material = blue;
+
+        }
+
+        for (int i = 0; i < pointCount; i++) {
+            Debug.Log("point: " + i + " is " + points[i].transform.position);
         }
 
         foreach (Facet i in finalFacets)
@@ -260,6 +266,10 @@ public class GiftWrapper : MonoBehaviour
         {
             Giftwrap();
         }
+        if (Input.GetButtonUp("Fire1"))
+        {
+            findFirstFacet();
+        }
 
     }
 
@@ -273,7 +283,7 @@ public class GiftWrapper : MonoBehaviour
             return false;
     }
 
-    Facet findFirstFacet(GameObject[] points)
+    Facet findFirstFacet()
     {
         GameObject p1 = findMinPoint(points);
         GameObject p2 = findEdgeOnHull(points, p1);
