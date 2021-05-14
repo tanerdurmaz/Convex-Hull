@@ -273,6 +273,147 @@ public class GiftWrapper : MonoBehaviour
             return false;
     }
 
+    Facet findFirstFacet(GameObject[] points)
+    {
+        GameObject p1 = findMinPoint(points);
+        GameObject p2 = findEdgeOnHull(points, p1);
+        GameObject p3 = findFacetOnHull(points, p1, p2);
+        return new Facet(p1, p2, p3, blue);
+    }
 
-}
-// end
+    GameObject findMinPoint(GameObject[] points)
+    {
+        List<GameObject> listOfX = new List<GameObject>();
+        float minX = minXFromCoordinates(points);
+
+        foreach (GameObject p in points)
+        {
+            if (p.transform.position.x == minX)
+                listOfX.Add(p);
+        }
+
+        if (listOfX.Count == 1)
+            return listOfX[0];
+
+        List<GameObject> listOfY = new List<GameObject>();
+        float minY = minYFromCoordinates(points);
+
+        foreach (GameObject p in listOfY)
+        {
+            if (p.transform.position.y == minY)
+                listOfY.Add(p);
+        }
+
+        if (listOfY.Count == 1)
+            return listOfY[0];
+
+        List<GameObject> listOfZ = new List<GameObject>();
+        float minZ = minZFromCoordinates(points);
+
+        foreach (GameObject p in listOfZ)
+        {
+            if (p.transform.position.z == minZ)
+                listOfZ.Add(p);
+        }
+
+        return listOfZ[0];
+
+    }
+
+    float minXFromCoordinates(GameObject[] points)
+    {
+        float minValue = 2147483648f;
+
+        foreach (GameObject p in points)
+        {
+            if (p.transform.position.x < minValue)
+            {
+                minValue = p.transform.position.x;
+            }
+        }
+        return minValue;
+    }
+
+    float minYFromCoordinates(GameObject[] points)
+    {
+        float minValue = 2147483648f;
+
+        foreach (GameObject p in points)
+        {
+            if (p.transform.position.y < minValue)
+            {
+                minValue = p.transform.position.y;
+            }
+        }
+        return minValue;
+    }
+
+    float minZFromCoordinates(GameObject[] points)
+    {
+        float minValue = 2147483648f;
+
+        foreach (GameObject p in points)
+        {
+            if (p.transform.position.z < minValue)
+            {
+                minValue = p.transform.position.z;
+            }
+        }
+        return minValue;
+    }
+
+    GameObject findEdgeOnHull(GameObject[] points, GameObject p1)
+    {
+        Vector3 tempVector = Vector3.right - p1.transform.position;
+
+        float maxAngle = 0f;
+        GameObject maxAnglePoint = new GameObject();
+
+        foreach (GameObject p in points)
+        {
+            Vector3 angularVector = p.transform.position - p1.transform.position;
+            float angle = Vector3.Angle(tempVector, angularVector);
+
+            if (angle > maxAngle)
+            {
+                maxAngle = angle;
+                maxAnglePoint = p;
+            }
+        }
+
+        return maxAnglePoint;
+    }
+
+    GameObject findFacetOnHull(GameObject[] points, GameObject p1, GameObject p2)
+    {
+        Vector3 np1 = Vector3.right - p1.transform.position; // plane normal
+
+        Vector3 v1;
+        Vector3 v2;
+        Vector3 nF; // facet normal
+
+        float maxAngle = 0f;
+        GameObject maxAnglePoint = new GameObject();
+
+        foreach(GameObject p in points)
+        {
+            v1 = p2.transform.position - p1.transform.position;
+            v2 = p.transform.position - p1.transform.position;
+
+            nF = Vector3.Cross(v1, v2);
+
+            float planeAngle = Vector3.Angle(np1, nF);
+
+            if(planeAngle > maxAngle)
+            {
+                maxAngle = planeAngle;
+                maxAnglePoint = p;
+            }
+        }
+
+        return maxAnglePoint;
+
+    }
+
+
+} // end
